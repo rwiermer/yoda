@@ -21,8 +21,9 @@
 - name: Configure group-manager privilege groups in iCAT database
   become_user: "{{ irods_service_account }}"
   become: true
-  ansible.builtin.command: # noqa no-changed-when
+  ansible.builtin.command:
     cmd: '/etc/irods/yoda-ruleset/tools/group-manager-setup.sh'
+  changed_when: true
   when: priv_groups.stdout.find('priv-admin') == -1
 
 
@@ -146,9 +147,9 @@
 - name: Ensure that Yoda metadata schema collection exists
   become_user: "{{ irods_service_account }}"
   become: true
-  # noqa no-changed-when
   ansible.builtin.shell: |
     imkdir /{{ irods_zone }}/yoda
+  changed_when: true
   when: not ansible_check_mode and system_collection.stderr.find('does not exist') >= 0
 
 
@@ -164,22 +165,22 @@
 - name: Ensure that Yoda metadata schema collection exists
   become_user: "{{ irods_service_account }}"
   become: true
-  # noqa no-changed-when
   ansible.builtin.shell: |
     imkdir /{{ irods_zone }}/yoda/schemas
     ichmod -rM inherit /{{ irods_zone }}/yoda/schemas
     ichmod -rM read public /{{ irods_zone }}/yoda/schemas
+  changed_when: true
   when: not ansible_check_mode and schemas_installed.stderr.find('does not exist') >= 0
 
 
 - name: Ensure each metadata schema collection exists
   become_user: "{{ irods_service_account }}"
   become: true
-  # noqa no-changed-when
   ansible.builtin.shell: |
     imkdir /{{ irods_zone }}/yoda/schemas/{{ item.name }}
     ichmod -rM inherit /{{ irods_zone }}/yoda/schemas/{{ item.name }}
     ichmod -rM read public /{{ irods_zone }}/yoda/schemas/{{ item.name }}
+  changed_when: true
   when: not ansible_check_mode and update_schemas == 1 and item.install and schemas_installed.stdout.find(item.name) == -1
   with_items: "{{ metadata_schemas }}"
 
@@ -275,11 +276,11 @@
 - name: Install terms and conditions
   become_user: "{{ irods_service_account }}"
   become: true
-  # noqa no-changed-when
   ansible.builtin.shell: |
     iput -r /etc/irods/yoda-ruleset/terms /{{ irods_zone }}/yoda
     ichmod -rM inherit /{{ irods_zone }}/yoda/terms
     ichmod -rM read public /{{ irods_zone }}/yoda/terms
+  changed_when: true
   when: (not ansible_check_mode) and (terms_installed.stderr.find('does not exist') >= 0)
 
 
@@ -295,11 +296,11 @@
 - name: Ensure that Yoda templates collection exists
   become_user: "{{ irods_service_account }}"
   become: true
-  # noqa no-changed-when
   ansible.builtin.shell: |
     imkdir /{{ irods_zone }}/yoda/templates
     ichmod -rM inherit /{{ irods_zone }}/yoda/templates
     ichmod -rM read public /{{ irods_zone }}/yoda/templates
+  changed_when: true
   when: (not ansible_check_mode) and (templates_installed.stderr.find('does not exist') >= 0)
 
 
@@ -327,11 +328,11 @@
 - name: Ensure that licenses system collection exists
   become_user: "{{ irods_service_account }}"
   become: true
-  # noqa no-changed-when
   ansible.builtin.shell: |
     imkdir /{{ irods_zone }}/yoda/licenses
     ichmod -rM inherit /{{ irods_zone }}/yoda/licenses
     ichmod -rM read public /{{ irods_zone }}/yoda/licenses
+  changed_when: true
   when: (not ansible_check_mode) and (licenses_installed.stderr.find('does not exist') >= 0)
 
 
@@ -361,11 +362,11 @@
 - name: Install preservable file formats lists
   become_user: "{{ irods_service_account }}"
   become: true
-  # noqa no-changed-when
   ansible.builtin.shell: |
     iput -r /etc/irods/yoda-ruleset/file_formats /{{ irods_zone }}/yoda
     ichmod -rM inherit /{{ irods_zone }}/yoda/file_formats
     ichmod -rM read public /{{ irods_zone }}/yoda/file_formats
+  changed_when: true
   when: (not ansible_check_mode) and (formats_installed.stderr.find('does not exist') >= 0)
 
 
@@ -381,9 +382,9 @@
 - name: Ensure priv-admin group has ownership to make changes to preservable file formats lists
   become_user: "{{ irods_service_account }}"
   become: true
-  # noqa no-changed-when
   ansible.builtin.command:
     ichmod -rM own priv-admin /{{ irods_zone }}/yoda/file_formats
+  changed_when: true
   when: not ansible_check_mode and file_formats_access.rc != 0
 
 
@@ -671,10 +672,10 @@
 - name: Ensure datarequest system collection is present
   become_user: "{{ irods_service_account }}"
   become: true
-  # noqa no-changed-when
   ansible.builtin.shell: |
     imkdir /{{ irods_zone }}/yoda/datarequest
     ichmod read public /{{ irods_zone }}/yoda/datarequest
+  changed_when: true
   when: enable_datarequest and not ansible_check_mode and datarequest_system_collection.stderr.find('does not exist') >= 0
 
 
@@ -691,8 +692,9 @@
 - name: Install default datarequest module schemas if they do not exist
   become_user: "{{ irods_service_account }}"
   become: true
-  ansible.builtin.command: # noqa no-changed-when
+  ansible.builtin.command:
     cmd: "/etc/irods/yoda-ruleset/tools/install-datarequest-schemas.sh '{{ irods_zone }}'"
+  changed_when: true
   when: enable_datarequest and not ansible_check_mode and datarequest_schema_collection.stderr.find('does not exist') >= 0
 
 
@@ -709,8 +711,9 @@
 - name: Ensure datarequests data directory is present
   become_user: '{{ irods_service_account }}'
   become: true
-  ansible.builtin.command: # noqa no-changed-when
+  ansible.builtin.command:
     cmd: '/etc/irods/yoda-ruleset/tools/create-data-directory.sh'
+  changed_when: true
   when: enable_datarequest and not ansible_check_mode and data_requests.stderr.find('does not exist') >= 0
 
 

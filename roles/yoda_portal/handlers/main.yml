@@ -8,5 +8,6 @@
 
 
 - name: Restart portal application
-  ansible.builtin.command: # noqa no-changed-when
+  ansible.builtin.command:
     cmd: /bin/touch /var/www/yoda/yoda.wsgi /var/www/yoda/yoda_debug.wsgi
+  changed_when: true

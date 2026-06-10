@@ -28,10 +28,11 @@
 
 
 - name: Disable OpenSearch plugins
-  ansible.builtin.command: # noqa no-changed-when
+  ansible.builtin.command:
     cmd: mv '{{ opensearch.plugins }}' '{{ opensearch.plugins }}.disabled'
   args:
     creates: '{{ opensearch.plugins }}.disabled'
+  changed_when: true
 
 
 - name: Create empty plugins directory

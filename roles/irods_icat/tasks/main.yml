@@ -251,7 +251,7 @@
     - name: Get iRODS major version
       become_user: '{{ irods_service_account }}'
       become: true
-      ansible.builtin.command: # noqa no-changed-when
+      ansible.builtin.command:
         cmd: 'python3 {{ irods_directory.stdout }}/scripts/get_irods_version.py major'
       register: irods_major_version
       ignore_errors: true
@@ -260,8 +260,9 @@
     - name: Upgrade iRODS catalog to v5
       become_user: '{{ irods_service_account }}'
       become: true
-      ansible.builtin.command: # noqa no-changed-when
+      ansible.builtin.command:
         cmd: 'python3 {{ irods_directory.stdout }}/scripts/upgrade_irods.py'
+      changed_when: true
       when: not ansible_check_mode and (irods_major_version.stdout | int) < 5
       notify: Systemd daemon reload
 
@@ -308,9 +309,10 @@
 - name: Wait until iRODS server is ready to receive requests
   become_user: '{{ irods_service_account }}'
   become: true
-  ansible.builtin.command: # noqa no-changed-when
+  ansible.builtin.command:
     cmd: 'ils /{{ irods_zone }}/home'
   register: ils
+  changed_when: false
   until: ils is succeeded
   retries: 5
   delay: 10
@@ -362,8 +364,9 @@
     - name: Provide iRODS read access for all users on /zone/home
       become_user: '{{ irods_service_account }}'
       become: true
-      ansible.builtin.command: # noqa no-changed-when
+      ansible.builtin.command:
         cmd: 'ichmod -M read public /{{ irods_zone }}/home'
+      changed_when: true
       when: read_access is failed
 
 
@@ -556,8 +559,9 @@
     - name: Provide iRODS read access for anonymous user on /zone/home
       become_user: '{{ irods_service_account }}'
       become: true
-      ansible.builtin.command: # noqa no-changed-when
+      ansible.builtin.command:
         cmd: 'ichmod -M read anonymous /{{ irods_zone }}/home'
+      changed_when: true
       when: read_access is failed
 
 
@@ -574,8 +578,9 @@
     - name: Remove public collection provided that it is empty
       become_user: '{{ irods_service_account }}'
       become: true
-      ansible.builtin.command: # noqa no-changed-when
+      ansible.builtin.command:
         cmd: 'irmdir /{{ irods_zone }}/home/public'
+      changed_when: true
       when: (not ansible_check_mode) and (public_coll.stdout.find('/home/public') >= 0)
 
 
@@ -593,9 +598,13 @@
 - name: Ensure unneeded iRODS specific queries are absent
   become_user: '{{ irods_service_account }}'
   become: true
-  ansible.builtin.command: # noqa no-changed-when ignore-errors
+  ansible.builtin.command:
     cmd: 'iadmin rsq {{ item }}'
-  ignore_errors: true
+  register: remove_specific_query
+  # iadmin rsq returns success only when it actually removed a query;
+  # a nonzero exit code means the query was already absent.
+  changed_when: remove_specific_query.rc == 0
+  failed_when: false
   with_items:
     - listQueryByAliasLike
     - findQueryByAlias
@@ -605,7 +614,6 @@
     - listSharedCollectionsSharedWithUser
     - listUserACLForDataObjViaGroup
     - listUserACLForCollectionViaGroup
-  changed_when: false
 
 
 - name: Ensure RUM job for removing unused metadata is present

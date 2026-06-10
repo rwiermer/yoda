@@ -46,7 +46,9 @@
     repo: "https://github.com/UtrechtUniversity/yoda-portal.git"
     dest: "/var/www/yoda"
     version: "{{ yoda_portal_version }}"
-    force: "yes"
+    # In development local modifications (e.g. built assets) are overwritten;
+    # elsewhere a dirty checkout fails instead of silently discarding changes.
+    force: "{{ yoda_environment == 'development' }}"
   register: portalchanges
   notify:
     - Restart Apache webserver

@@ -73,7 +73,6 @@
 - name: Upgrade PostgreSQL database
   become_user: postgres
   become: true
-  # noqa no-changed-when
   ansible.builtin.command: "/usr/pgsql-{{ pgsql_version }}/bin/pg_upgrade \
 			   -b /var/lib/pgsql/shim \
 			   -B /usr/pgsql-{{ pgsql_version }}/bin \
@@ -81,6 +80,7 @@
 			   -D /var/lib/pgsql/{{ pgsql_version }}/data"
   args:
     chdir: "/var/lib/pgsql"
+  changed_when: true
   when: "'postgresql-server' in ansible_facts.packages"
 
 

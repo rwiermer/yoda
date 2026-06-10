@@ -47,12 +47,12 @@
 - name: Install Data Archive mock service # noqa no-handler
   become_user: "{{ irods_service_account }}"
   become: true
-  # noqa no-changed-when
   ansible.builtin.shell: |
     cd /var/lib/irods/data-archive-mock
     {{ data_archive_mock_python3_path }} -m venv data_archive_venv
     . data_archive_venv/bin/activate
     pip install .
+  changed_when: true
   when: da_mock_changes.changed
 
 

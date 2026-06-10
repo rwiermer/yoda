@@ -13,7 +13,9 @@
     dest: "/etc/irods/{{ item.name }}"
     version: "{{ item.version }}"
     update: "{{ update_rulesets }}"
-    force: true
+    # In development local modifications are overwritten; elsewhere a dirty
+    # checkout fails instead of silently discarding changes.
+    force: "{{ yoda_environment == 'development' }}"
   with_items: "{{ extra_rulesets + core_rulesets }}"
   when: "'repo' in item and 'patch' not in item"
   register: repochanges
@@ -63,9 +65,10 @@
 - name: Apply patches to rulesets
   become_user: "{{ irods_service_account }}"
   become: true
-  ansible.builtin.command: # noqa no-changed-when command-instead-of-module
+  ansible.builtin.command: # noqa command-instead-of-module
     chdir: "/etc/irods/{{ item.name }}"
     cmd: "git apply /etc/irods/{{ item.name }}.patch"
+  changed_when: true
   with_items: "{{ extra_rulesets + core_rulesets }}"
   when: "'repo' in item and 'patch' in item and item['patch'] not in ['']"
   notify: Restart iRODS
@@ -74,8 +77,9 @@
 - name: Remove temporary rule and cache files
   become_user: '{{ irods_service_account }}'
   become: true
-  ansible.builtin.command: # noqa no-changed-when no-handler
+  ansible.builtin.command: # noqa no-handler
     cmd: '/bin/find /etc/irods -type f ( -name "*.re.*" -o -name "*.pyc" ) -delete'
+  changed_when: true
   when: repochanges.changed or patch_repochanges.changed
 
 
