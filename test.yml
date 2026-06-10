@@ -17,6 +17,9 @@
   become: true
   roles:
     - role: yoda_test
+      # Test data is created in the single iRODS zone, so provision it
+      # once per cluster rather than once per host in the test group.
+      run_once: true
       when: yoda_environment != "production"
   tags:
     - test

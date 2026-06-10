@@ -22,6 +22,8 @@
 - name: Ensure all resources exist
   become_user: '{{ irods_service_account }}'
   become: true
+  # Resources are zone-wide, so this runs once per cluster.
+  run_once: true
   # noqa fqcn[action]
   irods_resource:
     name: "{{ item.name }}"

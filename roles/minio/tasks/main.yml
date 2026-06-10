@@ -76,16 +76,25 @@
     state: started
 
 
+- name: Wait for MinIO to accept S3 connections
+  ansible.builtin.wait_for:
+    host: "{{ s3_hostname.split(':') | first }}"
+    port: "{{ s3_hostname.split(':')[1] if ':' in s3_hostname else 80 }}"
+    timeout: 60
+
+
 - name: Check S3 bucket for Yoda is present
   become_user: '{{ irods_service_account }}'
   become: true
-  ansible.builtin.shell: s3cmd ls | grep yoda
+  ansible.builtin.shell: |
+    set -o pipefail
+    s3cmd ls | grep yoda
+  args:
+    executable: /bin/bash
   register: bucket_check
-  ignore_errors: true
+  # rc 1 means the bucket does not exist yet; it is created below.
+  failed_when: bucket_check.rc not in [0, 1]
   changed_when: false
-  until: bucket_check.rc != 1
-  retries: 5
-  delay: 10
 
 
 - name: Ensure S3 bucket for Yoda is present

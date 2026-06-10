@@ -1,9 +1,13 @@
 ---
 # copyright Utrecht University
+#
+# The indexes live in the single iCAT database, so each task runs once per
+# cluster rather than once per host in the databases group.
 
 - name: Remove Yoda-specific indexes on iCAT database
   become: true
   become_user: postgres
+  run_once: true
   community.postgresql.postgresql_idx:
     login_db: '{{ irods_database_name }}'
     name: '{{ item }}'
@@ -20,6 +24,7 @@
 - name: Install or remove pg_trgm extension for trigram matching on iCAT database
   become: true
   become_user: postgres
+  run_once: true
   community.postgresql.postgresql_ext:
     state: '{{ "present" if irods_database_enable_yoda_indexes else "absent" }}'
     name: pg_trgm
@@ -29,6 +34,7 @@
 - name: Install Yoda-specific indexes on iCAT database
   become: true
   become_user: postgres
+  run_once: true
   community.postgresql.postgresql_idx:
     login_db: '{{ irods_database_name }}'
     name: '{{ item.name }}'
