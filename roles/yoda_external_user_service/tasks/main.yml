@@ -58,7 +58,9 @@
     repo: "https://github.com/UtrechtUniversity/yoda-portal.git"
     dest: "/var/www/yoda"
     version: "{{ yoda_portal_version }}"
-    force: true
+    # In development local modifications are overwritten; elsewhere a dirty
+    # checkout fails instead of silently discarding changes.
+    force: "{{ yoda_environment == 'development' }}"
   when: "'portals' not in group_names"
 
 
@@ -98,13 +100,15 @@
     repo: "https://github.com/UtrechtUniversity/yoda-external-user-service.git"
     dest: "/var/www/extuser/yoda-external-user-service"
     version: "{{ yoda_eus_version }}"
-    force: true
+    # In development local modifications are overwritten; elsewhere a dirty
+    # checkout fails instead of silently discarding changes.
+    force: "{{ yoda_environment == 'development' }}"
 
 
 - name: Check portal version for cache buster
   become_user: "{{ yoda_deployment_user }}"
   become: true
-  ansible.builtin.command:  # noqa no-changed-when command-instead-of-module
+  ansible.builtin.command:  # noqa command-instead-of-module
     chdir: /var/www/yoda
     cmd: git rev-parse HEAD
   changed_when: false
@@ -114,7 +118,7 @@
 - name: Check EUS version for cache buster
   become_user: "{{ yoda_deployment_user }}"
   become: true
-  ansible.builtin.command:  # noqa no-changed-when command-instead-of-module
+  ansible.builtin.command:  # noqa command-instead-of-module
     chdir: /var/www/extuser/yoda-external-user-service
     cmd: git rev-parse HEAD
   changed_when: false

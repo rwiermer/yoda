@@ -214,14 +214,16 @@
 
 
 - name: Ensure selinux context is enforced on Yoda MOAI log
-  ansible.builtin.command: # noqa no-changed-when
+  ansible.builtin.command:
     cmd: 'restorecon {{ yoda_moai_home }}/moai.log'
+  changed_when: true
   when: ansible_os_family == 'RedHat' and ansible_selinux.status == "enabled" and moailog_context.changed
 
 
 - name: Ensure selinux context is enforced on shared libraries
-  ansible.builtin.command: # noqa no-changed-when
+  ansible.builtin.command:
     cmd: 'restorecon -r {{ yoda_moai_home }}/yoda-moai/venv'
+  changed_when: true
   when: ansible_os_family == 'RedHat' and ansible_selinux.status == "enabled" and filescontext.changed
 
 
@@ -235,8 +237,9 @@
 
 
 - name: Ensure selinux context is enforced on Yoda MOAI database
-  ansible.builtin.command: # noqa no-changed-when
+  ansible.builtin.command:
     cmd: 'restorecon {{ yoda_moai_home }}/moai.db'
+  changed_when: true
   when: ansible_os_family == 'RedHat' and ansible_selinux.status == "enabled" and filecontext is changed
 
 

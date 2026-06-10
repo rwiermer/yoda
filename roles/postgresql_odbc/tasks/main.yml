@@ -31,8 +31,9 @@
 
 
 - name: Configure ODBC for PostgreSQL
-  ansible.builtin.command: # noqa no-changed-when
+  ansible.builtin.command:
     cmd: odbcinst -i -d -r
+  changed_when: true
   args:
     stdin: |
       [PostgreSQL]

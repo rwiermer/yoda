@@ -29,7 +29,9 @@
     repo: "https://github.com/UtrechtUniversity/yoda-web-mock.git"
     dest: "/var/www/webmock/yoda-web-mock"
     version: "{{ yoda_web_mock_version }}"
-    force: true
+    # In development local modifications are overwritten; elsewhere a dirty
+    # checkout fails instead of silently discarding changes.
+    force: "{{ yoda_environment == 'development' }}"
 
 
 - name: Ensure directory for Yoda web mock repository is accessible

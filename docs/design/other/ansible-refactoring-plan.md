@@ -4,10 +4,16 @@ parent: Other
 ---
 # Plan: modularize the Ansible playbook, fail early on misconfiguration, reduce runtime
 
-Status: phases 1, 2.1 and 3.1 implemented; remaining phases proposed
+Status: phases 1, 2.1, 2.2 and 3.1 implemented; remaining phases proposed
 Date: 2026-06-09
 
 Implemented so far:
+
+- Phase 2.2: all `noqa: no-changed-when` suppressions replaced with explicit
+  `changed_when` conditions, git checkouts only use `force` in development
+  environments, the yoda_report ssh-keyscan and pip install tasks are
+  idempotent. The AppArmor profile loops in the postfix role were left as-is:
+  they use the idempotent copy module and only do real work on first run.
 
 - Phase 1.1: `roles/validate_config` runs as the first play of `playbook.yml`
   (`playbooks/validate.yml`, tagged `always`/`validate`).

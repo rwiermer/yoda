@@ -20,7 +20,8 @@
 
 
 - name: Load Postfix Canonical Map
-  ansible.builtin.command: # noqa no-changed-when
+  ansible.builtin.command:
     cmd: postmap canonical
     chdir: /etc/postfix
+  changed_when: true
   when: not ansible_check_mode

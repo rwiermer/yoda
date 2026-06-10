@@ -29,12 +29,13 @@
 
 
 - name: Initialize Davrods lock database if it does not exist yet
-  ansible.builtin.shell: # noqa no-changed-when
+  ansible.builtin.shell:
     cmd: |
       set -o pipefail
       echo "{{ yoda_davrods_empty_lock_database_data }}" | xxd -a -r > "{{ yoda_davrods_lockdir }}/lockdb_locallock"
   args:
     executable: /bin/bash
+  changed_when: true
   when: not yoda_davrods_lockdb_status.stat.exists
 
 

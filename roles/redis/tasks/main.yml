@@ -11,9 +11,10 @@
     state: present
 
 
-- name: Check if default Redis service exists # noqa no-changed-when
+- name: Check if default Redis service exists
   ansible.builtin.command: "systemctl status {{ default_redis_service_name }}"
   register: default_redis_service_check
+  changed_when: false
   ignore_errors: true
 
 
