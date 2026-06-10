@@ -4,10 +4,19 @@ parent: Other
 ---
 # Plan: modularize the Ansible playbook, fail early on misconfiguration, reduce runtime
 
-Status: phases 1, 2.1, 2.2 and 3.1 implemented; remaining phases proposed
+Status: phases 1, 2.1, 2.2, 2.3 and 3.1 implemented; remaining phases proposed
 Date: 2026-06-09
 
 Implemented so far:
+
+- Phase 2.3: zone/cluster-singleton operations (`yoda_database_indexes`,
+  `composable_resources` resource creation, `yoda_test` data provisioning)
+  use `run_once`; the MinIO bucket check waits for the S3 port instead of
+  polling for a bucket that cannot exist on first runs (~50 s saved per
+  first deploy). Retry-loop audit: the iRODS `ils` waits, the OpenSearch
+  HTTP readiness loop and the metadata-schema `async_status` polling all
+  poll the actual readiness condition and were kept as-is. Feature-flagged
+  roles are already gated at play level before any work runs.
 
 - Phase 2.2: all `noqa: no-changed-when` suppressions replaced with explicit
   `changed_when` conditions, git checkouts only use `force` in development
